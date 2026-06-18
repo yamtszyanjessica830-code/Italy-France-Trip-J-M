@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>意法15天隨身手冊</title>
+    <style>
+        :root { 
+            --bg-p: #ffffff; 
+            --bg-s: #f7f7f7; 
+            --bg-c: #ffffff; 
+            --text-p: #37352f; 
+            --text-s: #7c7a77; 
+            --border: #e9e9e8; 
+            --blue: #2383e2; 
+            --red: #d4402a; 
+            --red-bg: #fdf5f4;
+            --success: #0f7b4e;
+            --success-bg: #f0f9f4;
+        }
+        .dark-mode { 
+            --bg-p: #191919; 
+            --bg-s: #202020; 
+            --bg-c: #252525; 
+            --text-p: #fbfbfb; 
+            --text-s: #9b9b9b; 
+            --border: #303030; 
+            --blue: #529cca;
+            --success: #42b983;
+            --success-bg: #1c3329;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background-color: var(--bg-p); 
+            color: var(--text-p); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding-bottom: 80px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .box { max-width: 480px; margin: 0 auto; padding: 0 14px; }
+        header { 
+            position: sticky; top: 0; z-index: 100; 
+            background: var(--bg-p); border-bottom: 1px solid var(--border); 
+            padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;
+            transition: background 0.3s;
+        }
+        .card { 
+            background: var(--bg-c); border: 1px solid var(--border); 
+            border-radius: 10px; padding: 12px; margin-bottom: 10px; 
+            cursor: pointer; position: relative;
+            transition: all 0.2s ease;
+        }
+        .card:active { transform: scale(0.98); }
+        .card.done { 
+            opacity: 0.75; 
+            border-color: var(--success); 
+            background: var(--success-bg);
+        }
+        .card-h { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; font-weight: 700; }
+        .card-d { color: #fff; background: var(--blue); padding: 2px 6px; border-radius: 4px; }
+        .card-t { font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+        .sect { display: none; opacity: 0; transition: opacity 0.25s; } 
+        .sect.active { display: block; opacity: 1; }
+        .back { 
+            background: none; border: none; color: var(--blue); 
+            font-weight: 600; cursor: pointer; padding: 12px 0;
+            font-size: 14px;
+        }
+        .h-box { 
+            background: var(--bg-s); border-left: 4px solid var(--blue); 
+            padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px;
+            line-height: 1.5;
+        }
+        .url-box { 
+            background: var(--bg-s); border: 1px solid var(--border); 
+            padding: 6px; border-radius: 4px; font-family: monospace; 
+            font-size: 11px; word-break: break-all; margin: 4px 0 10px; 
+        }
+        .time-i { 
+            position: relative; padding-left: 14px; 
+            border-left: 2px solid var(--border); font-size: 13.5px; 
+            margin: 12px 0; line-height: 1.7;
+        }
+        .notes-area textarea { 
+            width: 100%; height: 80px; border-radius: 6px; 
+            border: 1px solid var(--border); background: var(--bg-s); 
+            padding: 8px; font-size: 12px; resize: none;
+            color: var(--text-p);
+        }
+        nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: var(--bg-p); border-top: 1px solid var(--border); 
+            padding: 6px 0; display: flex; z-index: 100;
+            transition: background 0.3s;
+        }
+        .nav-btn { 
+            display: flex; flex-direction: column; align-items: center; 
+            background: none; border: none; color: var(--text-s); 
+            font-size: 10px; cursor: pointer; width: 33.33%; gap:4px;
+            padding:6px 0;
+        }
+        .nav-btn span:first-child { font-size:18px; }
+        .nav-btn.active { color: var(--blue); }
+        .t-box { 
+            font-size: 12.5px; line-height: 1.5; background: var(--bg-s); 
+            padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border); 
+        }
+        .check-wrap {
+            margin:12px 0;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        #isDone { width:16px;height:16px; cursor:pointer; }
+        .tip-text { font-size:11px;color:var(--text-s);margin-top:6px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div><h1 style="font-size:15px;">意法15天隨身手冊</h1></div>
+        <button onclick="document.body.classList.toggle('dark-mode');saveDarkMode()" style="background:none; border:none; font-size:18px;cursor:pointer;">🌓</button>
+    </header>
+
+    <div class="box">
+        <!-- 行程列表頁 -->
+        <section id="list-v" class="sect active" style="margin-top:10px;"></section>
+
+        <!-- 單日詳細頁 -->
+        <section id="detail-v" class="sect">
+            <button class="back" onclick="goBack()">⬅️ 返回行程列表</button>
+            <div id="det-content"></div>
+
+            <!-- 完成勾選 -->
+            <div class="check-wrap">
+                <input type="checkbox" id="isDone" onchange="saveDayStatus()">
+                <label for="isDone">標記今日行程已完成</label>
+            </div>
+
+            <!-- 備註輸入框 -->
+            <div class="notes-area" style="margin-top:10px;">
+                <p style="font-size:12px; margin-bottom:4px;">📝 隨手筆記（本地儲存）：</p>
+                <textarea id="notes" oninput="saveNotes()" placeholder="輸入房號、車位、預訂編號、緊急電話..."></textarea>
+            </div>
+            <p class="tip-text">所有筆記/完成狀態/深色模式會自動存在手機本機，清除瀏覽數據才會消失</p>
+        </section>
+    </div>
+
+    <!-- 底部導航 -->
+    <nav>
+        <button id="n-list" class="nav-btn active" onclick="nav('list')">
+            <span>📅</span>
+            <span>全部行程</span>
+        </button>
+        <button class="nav-btn" onclick="alert('可自行擴充：備忘錄/預算/地圖頁面')">
+            <span>📒</span>
+            <span>備忘</span>
+        </button>
+        <button class="nav-btn" onclick="alert('可自行擴充：開支記賬')">
+            <span>💰</span>
+            <span>預算</span>
+        </button>
+    </nav>
+
+    <script>
+        // 住宿地址變數
+        const addrSpezia = "La Spezia Airbnb<br><span style='font-size:12px;color:var(--text-s);'>📍 Via Filippo Corridoni, 22, 19122, 拉斯佩齊亞, 義大利</span>";
+        const addrNice = "Nice Airbnb<br><span style='font-size:12px;color:var(--text-s);'>📍 44 Rue Lamartine, 06000, 尼斯, 法國</span>";
+        
+        // 15天行程數據
+        const data = [
+            { d: 1, dt: "24/7 Fri", t: "香港 ➔ 多哈 ➔ 米蘭", h: "Palazzo Loreto Hotel", det: "✈️ 01:25-14:15抵達<br>🚆 機場快線 (Malpensa Express) 往中央車站<br>⏱️ 車程：50分鐘<br>💰 車費：€13" },
+            { d: 2, dt: "25/7 Sat", t: "米蘭經典遊", h: "Palazzo Loreto Hotel", det: "🚇 市內地鐵/電車<br>💰 24小時天票：€7.60" },
+            { d: 3, dt: "26/7 Sun", t: "科莫湖自駕船 & 雙子鎮浪漫遊", h: "Palazzo Loreto Hotel", det: "🚂 <b>去程交通：</b>米蘭 ➔ Como (火車約 45分鐘, €5.20)<br>🛥️ <b>湖上自駕：</b>Como 碼頭 <b>Shusciu Nautical Division</b> 租用免牌照自駕船 (No license boat) 2小時自駕遊湖（近觀湖畔別墅，可游泳拍照，建議準備歐元現金）<br>⛴️ <b>交通：</b>Como ➔ Bellagio (快速渡輪約 45分鐘, €14.80)<br>⛴️ <b>交通：</b>Bellagio ➔ Varenna (渡輪約 15分鐘, €4.60)<br>🚂 <b>回程交通：</b>Varenna-Esino ➔ 米蘭中央車站 (火車 1小時 3分鐘, €7.10)" },
+            { d: 4, dt: "27/7 Mon", t: "米蘭 ➔ 拉斯佩齊亞", h: addrSpezia, det: "🚂 <b>交通：</b>Intercity直達 (4.5小時)<br>💰 車費：早鳥票約 €20-30" },
+            { d: 5, dt: "28/7 Tue", t: "五漁村夕陽", h: addrSpezia, det: "🚂 Cinque Terre Card (無限搭乘火車)<br>💰 車費：約 €20-30/日" },
+            { d: 6, dt: "29/7 Wed", t: "跨國：拉斯佩齊亞 ➔ 尼斯", h: addrNice, det: "🚂 義鐵至 Ventimiglia (4.5小時, 約€20)<br>🚂 法鐵 TER 至 Nice Ville (50分鐘, 約€9)" },
+            { d: 7, dt: "30/7 Thu", t: "芒通 + 摩納哥", h: addrNice, det: "🚂 尼斯 ➔ 芒通 (35分鐘, 約€6)<br>🚂 芒通 ➔ 摩納哥 (15分鐘, 約€3)<br>🚂 摩納哥 ➔ 尼斯 (25分鐘, 約€4.5)" },
+            { d: 8, dt: "31/7 Fri", t: "埃茲崖頂石頭城", h: addrNice, det: "🚌 尼斯市搭 82/602 路巴士<br>⏱️ 車程：30分鐘<br>💰 車費：約 €2.5" },
+            { d: 9, dt: "1/8 Sat", t: "昂蒂布 ➔ 康城", h: addrNice, det: "🚂 尼斯 ➔ 昂蒂布 (25分鐘, 約€5)<br>🚂 昂蒂布 ➔ 康城 (15分鐘, 約€3)<br>🚂 康城 ➔ 尼斯 (40分鐘, 約€8)" },
+            { d: 10, dt: "2/8 Sun", t: "尼斯慢活", h: addrNice, det: "🚶‍♂️ 市內步行/輕軌 Tram (單程€2.10)" },
+            { d: 11, dt: "3/8 Mon", t: "自駕：尼斯 ➔ 艾克斯", h: "The Original Residence Aix", det: "🚗 尼斯取車 ➔ 凡爾登大峽谷 ➔ 艾克斯<br>⏱️ 總車程：約 4 小時" },
+            { d: 12, dt: "4/8 Tue", t: "自駕：呂貝隆/索村", h: "The Original Residence Aix", det: "🚗 艾克斯 ➔ Gordes ➔ Roussillon ➔ Sault<br>⏱️ 總車程：約 3-4 小時" },
+            { d: 13, dt: "5/8 Wed", t: "自駕：亞爾 ➔ 卡西斯", h: "Campanile Marseille Aubagne", det: "🚗 艾克斯 ➔ 亞爾 ➔ 雷博 ➔ Cassis ➔ Aubagne<br>⏱️ 總車程：約 3-4 小時" },
+            { d: 14, dt: "6/8 Thu", t: "馬賽空車半日遊", h: "Campanile Marseille Aubagne", det: "🚗 Aubagne ➔ 馬賽 (30分鐘)<br>⚠️ 行李留酒店，確保車內無任何雜物！" },
+            { d: 15, dt: "7/8 Fri", t: "尼斯還車 ➔ 返港", h: "飛機上", det: "🚗 Aubagne ➔ 尼斯機場 (A8高速, 約2小時, 約€20路費)<br>⛽ 還車前務必加滿油並保留收據" }
+        ];
+
+        let scrollPos = 0;
+        let curDay = null; // 當前查看第幾天（修復備註儲存bug）
+
+        // 讀取深色模式設定
+        function loadDarkMode() {
+            const dark = localStorage.getItem('darkMode');
+            if(dark === '1') document.body.classList.add('dark-mode');
+        }
+        function saveDarkMode() {
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark ? '1' : '0');
+        }
+
+        // 渲染行程列表
+        function render() {
+            const el = document.getElementById('list-v'); 
+            el.innerHTML = '';
+            data.forEach(d => {
+                const c = document.createElement('div');
+                // 讀取該天是否完成
+                const doneStatus = localStorage.getItem(`done_${d.d}`) === '1';
+                c.className = 'card' + (doneStatus ? ' done' : '');
+                c.onclick = () => { 
+                    scrollPos = window.scrollY; 
+                    openDay(d.d); 
+                };
+                c.innerHTML = `
+                    <div class="card-h">
+                        <span class="card-d">DAY ${d.d}</span>
+                        <span>${d.dt}</span>
+                    </div>
+                    <div class="card-t">${d.t}</div>
+                `;
+                el.appendChild(c);
+            });
+        }
+
+        // 打開單日詳情
+        function openDay(id) {
+            curDay = id;
+            const d = data.find(i => i.d === id);
+            // 切換頁面
+            document.getElementById('list-v').classList.remove('active');
+            document.getElementById('detail-v').classList.add('active');
+            window.scrollTo(0,0);
+            // 填入內容
+            document.getElementById('det-content').innerHTML = `
+                <h2 style="font-size:16px; margin:10px 0;">Day ${d.d} - ${d.t}</h2>
+                <div class="h-box">🏨 住宿：<div style="margin-top:5px;">${d.h}</div></div>
+                <div class="time-i">${d.det}</div>
+                <p style="font-size:11px;color:var(--text-s);">*註：火車/巴士費用僅供參考，實際價格視乎購票時間及車種而定。</p>
+            `;
+            // 載入備註
+            document.getElementById('notes').value = localStorage.getItem(`nt_${id}`) || '';
+            // 載入完成勾選狀態
+            document.getElementById('isDone').checked = localStorage.getItem(`done_${id}`) === '1';
+        }
+
+        // 儲存行程完成狀態
+        function saveDayStatus() {
+            if(!curDay) return;
+            const checked = document.getElementById('isDone').checked;
+            localStorage.setItem(`done_${curDay}`, checked ? '1' : '0');
+        }
+
+        // 儲存備註
+        function saveNotes() { 
+            if(!curDay) return;
+            localStorage.setItem(`nt_${curDay}`, document.getElementById('notes').value); 
+        }
+
+        // 返回列表
+        function goBack() { 
+            document.getElementById('detail-v').classList.remove('active'); 
+            document.getElementById('list-v').classList.add('active'); 
+            render(); // 重新渲染，更新完成標記樣式
+            setTimeout(() => window.scrollTo(0, scrollPos), 50); 
+        }
+
+        // 底部導航切換
+        function nav(page) {
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.closest('.nav-btn').classList.add('active');
+            if(page === 'list') {
+                goBack();
+            }
+        }
+
+        // 初始化
+        loadDarkMode();
+        render();
+    </script>
+</body>
+</html>
